@@ -1,175 +1,167 @@
 <!DOCTYPE html>
-<html lang="sr">
+<html lang="bs">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MCA 2017 – Mašinska obrada</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-        header {
-            background-color: #2c3e50;
-            color: white;
-            padding: 20px 0;
-            text-align: center;
-        }
-        nav {
-            background-color: #34495e;
-            text-align: center;
-            padding: 10px 0;
-        }
-        nav a {
-            color: white;
-            margin: 0 15px;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        section {
-            padding: 40px 20px;
-            max-width: 1000px;
-            margin: auto;
-            background-color: white;
-            margin-bottom: 20px;
-        }
-        h2 {
-            color: #2c3e50;
-        }
-        .service {
-            margin-bottom: 20px;
-        }
-        .gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-        .gallery img {
-            width: 100%;
-            height: auto;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .review {
-            margin-bottom: 20px;
-            padding: 15px;
-            border-left: 4px solid #2c3e50;
-            background-color: #f9f9f9;
-        }
-        footer {
-            background-color: #2c3e50;
-            color: white;
-            text-align: center;
-            padding: 15px 0;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Automatika Pro</title>
+<style>
+body { font-family: Arial, sans-serif; margin:0; padding:0; }
+nav { background: #333; color: white; padding: 10px 20px; position: sticky; top:0; display:flex; justify-content:space-between; align-items:center; }
+nav a { color:white; margin-right: 15px; text-decoration:none; }
+nav .lang { margin-left: auto; }
+nav .lang button { margin-left:5px; padding:5px 10px; border:none; border-radius:5px; cursor:pointer; }
+section { padding: 60px 20px; display:none; }
+section.active { display:block; }
+h1,h2 { color:#333; }
+.projects { display: flex; flex-wrap: wrap; gap: 20px; }
+.project { background:#f2f2f2; padding:20px; flex:1 1 250px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+form { display:flex; flex-direction: column; max-width:400px; }
+input, textarea, button { margin-bottom:10px; padding:10px; border-radius:5px; border:1px solid #ccc; }
+button { background:#333; color:white; border:none; cursor:pointer; }
+</style>
 </head>
 <body>
 
-<header>
-    <h1>MCA 2017</h1>
-    <p>Profesionalne usluge mašinske obrade metala – Čačak</p>
-</header>
-
 <nav>
+  <div class="menu">
+    <a href="#pocetna">Početna</a>
     <a href="#o-nama">O nama</a>
     <a href="#usluge">Usluge</a>
-    <a href="#galerija">Galerija</a>
+    <a href="#projekti">Projekti</a>
+    <a href="#dijelovi">Dijelovi</a>
     <a href="#recenzije">Recenzije</a>
     <a href="#kontakt">Kontakt</a>
+  </div>
+  <div class="lang">
+    <button onclick="showLang('bs')">BS</button>
+    <button onclick="showLang('en')">EN</button>
+    <button onclick="showLang('de')">DE</button>
+  </div>
 </nav>
 
-<section id="o-nama">
-    <h2>O nama</h2>
-    <p>Firma "MCA 2017" iz Čačka nudi precizne i pouzdane usluge mašinske obrade metala. Sa dugogodišnjim iskustvom u industriji, specijalizovani smo za razne metode obrade, uz primenu savremene tehnologije i alata. Naš cilj je kvalitet, preciznost i zadovoljstvo klijenata.</p>
+<!-- BOSANSKI -->
+<section id="bs" class="active">
+  <h1>Dobrodošli u Automatika Pro</h1>
+  <p>Mi nudimo profesionalna rješenja u Arduino projektima i industrijskoj automatizaciji.</p>
+
+  <h2>O nama</h2>
+  <p>Automatika Pro je firma sa dugogodišnjim iskustvom u razvoju Arduino i industrijskih projekata. Naš cilj je kvalitetno i pouzdano rješenje za sve naše klijente.</p>
+
+  <h2>Usluge</h2>
+  <ul>
+    <li>Projektovanje i programiranje Arduino sistema</li>
+    <li>Industrijska automatizacija</li>
+    <li>Prodaja Arduino komponenti</li>
+    <li>Održavanje i podrška projekata</li>
+  </ul>
+
+  <h2>Projekti</h2>
+  <div class="projects">
+    <div class="project"><h3>Navodnjavanje</h3><p>Automatski sistem za navodnjavanje baziran na Arduino kontroleru.</p></div>
+    <div class="project"><h3>Detektor plina</h3><p>Sigurnosni sistem za detekciju opasnih gasova u industrijskim pogonima.</p></div>
+    <div class="project"><h3>Osvjetljenje</h3><p>Pametno kontrolisano LED osvjetljenje za dom i industriju.</p></div>
+  </div>
+
+  <h2>Dijelovi</h2>
+  <p>Nudimo širok izbor Arduino i elektronike komponenti za vaše projekte.</p>
+
+  <h2>Recenzije</h2>
+  <p>„Odlična podrška i kvalitetno izvedeni projekti!“ – Zadovoljni klijent</p>
+  <p>„Brza i profesionalna realizacija Arduino sistema.“ – Zadovoljni klijent</p>
+
+  <h2>Kontakt</h2>
+  <form action="mailto:halilovicnusret8@gmail.com" method="post" enctype="text/plain">
+    <input type="text" name="ime" placeholder="Vaše ime" required>
+    <input type="email" name="email" placeholder="Vaš email" required>
+    <textarea name="poruka" rows="5" placeholder="Vaša poruka" required></textarea>
+    <button type="submit">Pošalji</button>
+  </form>
 </section>
 
-<section id="usluge">
-    <h2>Naše usluge</h2>
+<!-- ENGLISH -->
+<section id="en">
+  <h1>Welcome to Automatika Pro</h1>
+  <p>We offer professional solutions in Arduino projects and industrial automation.</p>
 
-    <div class="service">
-        <h3>Glodanje</h3>
-        <p>Visokoprecizno glodanje različitih materijala prema tehničkim zahtevima klijenata.</p>
-    </div>
+  <h2>About Us</h2>
+  <p>Automatika Pro is a company with long-standing experience in Arduino and industrial project development. Our goal is high-quality and reliable solutions for all our clients.</p>
 
-    <div class="service">
-        <h3>Struganje</h3>
-        <p>Obrada rotacionih delova sa velikom tačnošću i glatkoćom površine.</p>
-    </div>
+  <h2>Services</h2>
+  <ul>
+    <li>Arduino system design and programming</li>
+    <li>Industrial automation</li>
+    <li>Sale of Arduino components</li>
+    <li>Project maintenance and support</li>
+  </ul>
 
-    <div class="service">
-        <h3>Ravno brušenje</h3>
-        <p>Postizanje izuzetno ravnih površina i niskih tolerancija na različitim materijalima.</p>
-    </div>
+  <h2>Projects</h2>
+  <div class="projects">
+    <div class="project"><h3>Irrigation</h3><p>Automatic irrigation system based on Arduino controller.</p></div>
+    <div class="project"><h3>Gas Detector</h3><p>Safety system for detecting hazardous gases in industrial plants.</p></div>
+    <div class="project"><h3>Lighting</h3><p>Smart LED lighting controlled for home and industry.</p></div>
+  </div>
 
-    <div class="service">
-        <h3>Obimno brušenje</h3>
-        <p>Obrada cilindričnih površina sa preciznom završnom obradom.</p>
-    </div>
+  <h2>Components</h2>
+  <p>We offer a wide range of Arduino and electronic components for your projects.</p>
 
-    <div class="service">
-        <h3>Erodiranje – žičano (Wire EDM)</h3>
-        <p>Precizna obrada metala pomoću erodiranja žicom za komplikovane oblike i fine detalje.</p>
-    </div>
+  <h2>Reviews</h2>
+  <p>"Excellent support and high-quality projects!" – Satisfied client</p>
+  <p>"Fast and professional Arduino system implementation." – Satisfied client</p>
 
-    <div class="service">
-        <h3>Erodiranje – elektroda (Sinker EDM)</h3>
-        <p>Obrada unutrašnjih oblika i kalupa metodom elektro erozije pomoću elektroda.</p>
-    </div>
-
-    <div class="service">
-        <h3>Lasersko sečenje lima</h3>
-        <p>Precizno lasersko sečenje različitih vrsta limova prema crtežima ili CAD fajlovima.</p>
-    </div>
+  <h2>Contact</h2>
+  <form action="mailto:halilovicnusret8@gmail.com" method="post" enctype="text/plain">
+    <input type="text" name="name" placeholder="Your Name" required>
+    <input type="email" name="email" placeholder="Your Email" required>
+    <textarea name="message" rows="5" placeholder="Your Message" required></textarea>
+    <button type="submit">Send</button>
+  </form>
 </section>
 
-<section id="galerija">
-    <h2>Galerija</h2>
-    <div class="gallery">
-        <img src="slika1.jpg" alt="Slika 1">
-        <img src="slika2.jpg" alt="Slika 2">
-        <img src="slika3.jpg" alt="Slika 3">
-        <img src="slika4.jpg" alt="Slika 4">
-        <img src="slika5.jpg" alt="Slika 5">
-        <img src="slika6.jpg" alt="Slika 6">
-        <img src="slika7.jpg" alt="Slika 7">
-        <img src="slika8.jpg" alt="Slika 8">
-        <img src="slika9.jpg" alt="Slika 9">
-        <img src="slika10.jpg" alt="Slika 10">
-    </div>
+<!-- DEUTSCH -->
+<section id="de">
+  <h1>Willkommen bei Automatika Pro</h1>
+  <p>Wir bieten professionelle Lösungen in Arduino-Projekten und industrieller Automatisierung.</p>
+
+  <h2>Über uns</h2>
+  <p>Automatika Pro ist ein Unternehmen mit langjähriger Erfahrung in Arduino- und Industrieprojekten. Unser Ziel ist eine hochwertige und zuverlässige Lösung für alle unsere Kunden.</p>
+
+  <h2>Dienstleistungen</h2>
+  <ul>
+    <li>Arduino-Systemdesign und Programmierung</li>
+    <li>Industrielle Automatisierung</li>
+    <li>Verkauf von Arduino-Komponenten</li>
+    <li>Projektwartung und Unterstützung</li>
+  </ul>
+
+  <h2>Projekte</h2>
+  <div class="projects">
+    <div class="project"><h3>Bewässerung</h3><p>Automatisches Bewässerungssystem basierend auf Arduino-Controller.</p></div>
+    <div class="project"><h3>Gassensor</h3><p>Sicherheitssystem zur Erkennung gefährlicher Gase in Industrieanlagen.</p></div>
+    <div class="project"><h3>Beleuchtung</h3><p>Intelligente LED-Beleuchtung für Zuhause und Industrie.</p></div>
+  </div>
+
+  <h2>Bauteile</h2>
+  <p>Wir bieten eine große Auswahl an Arduino- und Elektronikkomponenten für Ihre Projekte.</p>
+
+  <h2>Bewertungen</h2>
+  <p>„Ausgezeichneter Support und qualitativ hochwertige Projekte!“ – Zufriedener Kunde</p>
+  <p>„Schnelle und professionelle Umsetzung von Arduino-Systemen.“ – Zufriedener Kunde</p>
+
+  <h2>Kontakt</h2>
+  <form action="mailto:halilovicnusret8@gmail.com" method="post" enctype="text/plain">
+    <input type="text" name="name" placeholder="Ihr Name" required>
+    <input type="email" name="email" placeholder="Ihre Email" required>
+    <textarea name="message" rows="5" placeholder="Ihre Nachricht" required></textarea>
+    <button type="submit">Senden</button>
+  </form>
 </section>
 
-<section id="recenzije">
-    <h2>Recenzije</h2>
-
-    <div class="review">
-        <p><strong>Marko P.:</strong> „Brza i precizna usluga! Sve preporuke za tim iz MCA 2017.“</p>
-    </div>
-
-    <div class="review">
-        <p><strong>Ivana R.:</strong> „Kvalitet obrade je na najvišem nivou. Vrlo profesionalni.“</p>
-    </div>
-
-    <div class="review">
-        <p><strong>Nemanja S.:</strong> „Sarađujemo već godinama. Pouzdani i uvek tačni.“</p>
-    </div>
-
-</section>
-
-<section id="kontakt">
-    <h2>Kontakt</h2>
-    <p><strong>Adresa:</strong> [Unesite adresu firme]</p>
-    <p><strong>Telefon:</strong> [Unesite broj telefona]</p>
-    <p><strong>Email:</strong> [Unesite email adresu]</p>
-    <p><strong>Radno vreme:</strong> Ponedeljak - Petak, 08:00 - 16:00</p>
-</section>
-
-<footer>
-    <p>&copy; 2025 MCA 2017 – Sva prava zadržana.</p>
-</footer>
+<script>
+function showLang(lang) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.getElementById(lang).classList.add('active');
+}
+</script>
 
 </body>
 </html>
