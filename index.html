@@ -1,126 +1,129 @@
-Evo ti kompletan, sređen kod koji možeš odmah prekopirati u svoj index.html.
-
-Izbacio sam sve nepotrebne Next.js stvari i napravio čist, funkcionalan interfejs gdje možeš kucati tekst ručno, a dodao sam i dugme koje simulira rad mikrofona (iako ga nemaš, kod je spreman ako ga nekad nabaviš).
-
-HTML
 <!DOCTYPE html>
 <html lang="bs">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diktiraj Izvještaj - Automatika Pro</title>
+    <title>AI Glasovni Izvještaji</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            width: 90%;
-            max-width: 500px;
-            text-align: center;
-        }
-        h2 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        /* KLJUČNI DIO: Textarea u kojoj se MOŽE kucati */
-        textarea {
-            width: 100%;
-            height: 200px;
-            padding: 15px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
-            resize: none; /* Sprečava mijenjanje veličine mišem */
-            outline: none;
-            transition: border-color 0.3s;
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background-color: #f4f4f9; margin: 0; padding: 10px; }
+        .container { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; box-sizing: border-box; }
+        
+        /* OVO JE SADA TEXTAREA GDJE MOŽEŠ KUCATI */
+        textarea { 
+            width: 100%; 
+            min-height: 150px; 
+            padding: 12px; 
+            border: 2px solid #ddd; 
+            border-radius: 8px; 
+            background: #fafafa; 
+            margin-bottom: 15px; 
+            font-size: 1rem; 
+            resize: vertical;
             box-sizing: border-box;
         }
-        textarea:focus {
-            border-color: #666;
-        }
-        .status {
-            margin: 15px 0;
-            font-style: italic;
-            color: #777;
-        }
-        .btn-mic {
-            background-color: #666;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto;
-            transition: background 0.3s;
-        }
-        .btn-mic:hover {
-            background-color: #333;
-        }
-        .btn-mic span {
-            margin-right: 8px;
-        }
+        textarea:focus { border-color: #007bff; outline: none; }
+
+        button { padding: 15px 25px; font-size: 1rem; cursor: pointer; border: none; border-radius: 50px; transition: 0.3s; width: 100%; margin-top: 10px; font-weight: bold; }
+        .btn-mic { background-color: #007bff; color: white; }
+        .btn-mic.recording { background-color: #dc3545; animation: pulse 1.5s infinite; }
+        .btn-send { background-color: #28a745; color: white; }
+        
+        #status { margin: 15px 0; color: #555; font-size: 0.9rem; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Diktiraj Izvještaj</h2>
+    <h2>Diktiraj ili Piši</h2>
     
-    <textarea id="output-text" placeholder="Klikni ovdje i počni kucati ili koristi mikrofon..."></textarea>
+    <textarea id="output" placeholder="Klikni na mikrofon i pričaj, ili sam upiši tekst ovdje..."></textarea>
     
-    <p class="status" id="status">Spreman za rad</p>
-
-    <button class="btn-mic" id="mic-btn">
-        <span>🎤</span> Pokreni Mikrofon
-    </button>
+    <div id="status">Spreman</div>
+    
+    <button id="micBtn" class="btn-mic">🎤 Pokreni Mikrofon</button>
+    <button id="sendBtn" class="btn-send">🚀 Pošalji u Bazu</button>
 </div>
 
 <script>
-    const micBtn = document.getElementById('mic-btn');
-    const statusText = document.getElementById('status');
-    const textArea = document.getElementById('output-text');
+    const micBtn = document.getElementById('micBtn');
+    const sendBtn = document.getElementById('sendBtn');
+    const output = document.getElementById('output');
+    const status = document.getElementById('status');
 
-    // Funkcija za mikrofon (ako ga nabaviš)
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition;
 
-    if (SpeechRecognition) {
-        const recognition = new SpeechRecognition();
+    if ('webkitSpeechRecognition' in window) {
+        recognition = new webkitSpeechRecognition();
+        recognition.continuous = true; // Sluša dok ga ne ugasiš
+        recognition.interimResults = true;
         recognition.lang = 'bs-BA';
 
-        micBtn.addEventListener('click', () => {
-            recognition.start();
-            statusText.innerText = "Slušam vas...";
-            statusText.style.color = "red";
-        });
+        recognition.onstart = () => {
+            micBtn.classList.add('recording');
+            micBtn.innerText = '🛑 Zaustavi Mikrofon';
+            status.innerText = 'Slušam vas...';
+        };
 
         recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            textArea.value += transcript + " ";
-            statusText.innerText = "Tekst uspješno unesen.";
-            statusText.style.color = "green";
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                transcript += event.results[i][0].transcript;
+            }
+            // Dodaje izgovoreni tekst u textarea
+            output.value = transcript;
         };
 
-        recognition.onerror = () => {
-            statusText.innerText = "Mikrofon nije pronađen ili je pristup odbijen.";
-            statusText.style.color = "orange";
+        recognition.onend = () => {
+            micBtn.classList.remove('recording');
+            micBtn.innerText = '🎤 Pokreni Mikrofon';
+            status.innerText = 'Snimanje završeno. Možete popraviti tekst prije slanja.';
         };
     } else {
-        statusText.innerText = "Vaš browser ne podržava glasovni unos.";
+        alert("Vaš browser ne podržava mikrofon. Koristite Google Chrome.");
     }
+
+    let isRecording = false;
+    micBtn.onclick = () => {
+        if (isRecording) {
+            recognition.stop();
+            isRecording = false;
+        } else {
+            output.value = '';
+            recognition.start();
+            isRecording = true;
+        }
+    };
+
+    sendBtn.onclick = async () => {
+        const tekst = output.value;
+        if (!tekst) {
+            alert("Prvo nešto kaži ili upiši!");
+            return;
+        }
+
+        status.innerText = 'Slanje u bazu...';
+        sendBtn.disabled = true;
+
+        try {
+            const response = await fetch('https://mpgbpgmsorunfbdskbwn.supabase.co/functions/v1/obradi-izvjestaj', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tekst_za_obradu: tekst })
+            });
+
+            if (response.ok) {
+                status.innerText = '✅ Uspješno upisano u bazu!';
+                output.value = '';
+            } else {
+                status.innerText = '❌ Greška pri slanju. Provjerite CORS u funkciji.';
+            }
+        } catch (err) {
+            status.innerText = '❌ Greška: ' + err.message;
+        } finally {
+            sendBtn.disabled = false;
+        }
+    };
 </script>
 
 </body>
