@@ -3,127 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Glasovni Izvještaji</title>
+    <title>AI Nadzor Alarma</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background-color: #f4f4f9; margin: 0; padding: 10px; }
-        .container { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; box-sizing: border-box; }
-        
-        /* OVO JE SADA TEXTAREA GDJE MOŽEŠ KUCATI */
-        textarea { 
-            width: 100%; 
-            min-height: 150px; 
-            padding: 12px; 
-            border: 2px solid #ddd; 
-            border-radius: 8px; 
-            background: #fafafa; 
-            margin-bottom: 15px; 
-            font-size: 1rem; 
-            resize: vertical;
-            box-sizing: border-box;
-        }
-        textarea:focus { border-color: #007bff; outline: none; }
-
-        button { padding: 15px 25px; font-size: 1rem; cursor: pointer; border: none; border-radius: 50px; transition: 0.3s; width: 100%; margin-top: 10px; font-weight: bold; }
+        body { font-family: sans-serif; background-color: #f4f4f9; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 600px; text-align: center; }
+        textarea { width: 100%; min-height: 100px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ddd; padding: 10px; }
+        button { padding: 12px 20px; cursor: pointer; border: none; border-radius: 8px; font-weight: bold; width: 100%; margin-bottom: 10px; }
         .btn-mic { background-color: #007bff; color: white; }
-        .btn-mic.recording { background-color: #dc3545; animation: pulse 1.5s infinite; }
         .btn-send { background-color: #28a745; color: white; }
-        
-        #status { margin: 15px 0; color: #555; font-size: 0.9rem; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        .btn-refresh { background-color: #17a2b8; color: white; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #eee; }
+        .alarm-aktivni { background-color: #ffcccc; color: #cc0000; font-weight: bold; animation: treperi 1s infinite; }
+        @keyframes treperi { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Diktiraj ili Piši</h2>
-    
-    <textarea id="output" placeholder="Klikni na mikrofon i pričaj, ili sam upiši tekst ovdje..."></textarea>
-    
-    <div id="status">Spreman</div>
-    
+    <h2>🎤 Novi Izvještaj / Alarm</h2>
+    <textarea id="output" placeholder="Izdiktiraj kvar ili sastanak..."></textarea>
     <button id="micBtn" class="btn-mic">🎤 Pokreni Mikrofon</button>
     <button id="sendBtn" class="btn-send">🚀 Pošalji u Bazu</button>
+
+    <hr>
+    
+    <h2>🔔 Aktivni Alarmi (24h)</h2>
+    <button id="refreshBtn" class="btn-refresh">🔄 Osvježi listu</button>
+    <div id="listaIzvjestaja">Učitavam podatke...</div>
 </div>
 
+<audio id="sirena" src="https://actions.google.com/sounds/v1/alarms/alarm_clock_short_beeps.ogg" preload="auto"></audio>
+
 <script>
+    // --- KONFIGURACIJA (OVDJE STAVI SVOJE KLJUČEVE) ---
+    const SUPABASE_URL = 'https://mpgbpgmsorunfbdskbwn.supabase.co';
+    const ANON_KEY = 'sb_publishable_PIRKTE7AzJKSBwLjPB04yg_laTBEEb6'; // Pronađi u Supabase Settings > API
+    const FUNCTION_URL = 'https://mpgbpgmsorunfbdskbwn.supabase.co/functions/v1/obradi-izvjestaj';
+
+    const output = document.getElementById('output');
     const micBtn = document.getElementById('micBtn');
     const sendBtn = document.getElementById('sendBtn');
-    const output = document.getElementById('output');
-    const status = document.getElementById('status');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const lista = document.getElementById('listaIzvjestaja');
+    const sirena = document.getElementById('sirena');
 
-    let recognition;
-
-    if ('webkitSpeechRecognition' in window) {
-        recognition = new webkitSpeechRecognition();
-        recognition.continuous = true; // Sluša dok ga ne ugasiš
-        recognition.interimResults = true;
-        recognition.lang = 'bs-BA';
-
-        recognition.onstart = () => {
-            micBtn.classList.add('recording');
-            micBtn.innerText = '🛑 Zaustavi Mikrofon';
-            status.innerText = 'Slušam vas...';
-        };
-
-        recognition.onresult = (event) => {
-            let transcript = '';
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                transcript += event.results[i][0].transcript;
-            }
-            // Dodaje izgovoreni tekst u textarea
-            output.value = transcript;
-        };
-
-        recognition.onend = () => {
-            micBtn.classList.remove('recording');
-            micBtn.innerText = '🎤 Pokreni Mikrofon';
-            status.innerText = 'Snimanje završeno. Možete popraviti tekst prije slanja.';
-        };
-    } else {
-        alert("Vaš browser ne podržava mikrofon. Koristite Google Chrome.");
-    }
-
-    let isRecording = false;
-    micBtn.onclick = () => {
-        if (isRecording) {
-            recognition.stop();
-            isRecording = false;
-        } else {
-            output.value = '';
-            recognition.start();
-            isRecording = true;
-        }
-    };
-
-    sendBtn.onclick = async () => {
-        const tekst = output.value;
-        if (!tekst) {
-            alert("Prvo nešto kaži ili upiši!");
-            return;
-        }
-
-        status.innerText = 'Slanje u bazu...';
-        sendBtn.disabled = true;
-
+    // 1. FUNKCIJA ZA POVLAČENJE PODATAKA I ALARM
+    async function povuciPodatke() {
+        lista.innerHTML = 'Provjeravam bazu...';
         try {
-            const response = await fetch('https://mpgbpgmsorunfbdskbwn.supabase.co/functions/v1/obradi-izvjestaj', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ tekst_za_obradu: tekst })
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/IZVJESTAJI_NH?select=*&order=DATUM.asc`, {
+                headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` }
             });
+            const podaci = await res.json();
+            
+            const sad = new Date();
+            const sutra = new Date(sad.getTime() + (24 * 60 * 60 * 1000));
+            let imaAlarma = false;
 
-            if (response.ok) {
-                status.innerText = '✅ Uspješno upisano u bazu!';
-                output.value = '';
-            } else {
-                status.innerText = '❌ Greška pri slanju. Provjerite CORS u funkciji.';
+            let html = '<table><tr><th>Datum</th><th>Razlog</th></tr>';
+            podaci.forEach(red => {
+                const d = new Date(red.DATUM);
+                const jeU24h = d >= sad && d <= sutra;
+                const klasa = jeU24h ? 'class="alarm-aktivni"' : '';
+                
+                if(jeU24h) imaAlarma = true;
+
+                html += `<tr ${klasa}>
+                    <td>${d.toLocaleString('bs-BA')}</td>
+                    <td>${red.RAZLOG}</td>
+                </tr>`;
+            });
+            html += '</table>';
+            lista.innerHTML = html;
+
+            if (imaAlarma) {
+                sirena.play().catch(() => console.log("Klikni na stranicu da omogućiš zvuk!"));
             }
         } catch (err) {
-            status.innerText = '❌ Greška: ' + err.message;
-        } finally {
-            sendBtn.disabled = false;
+            lista.innerHTML = 'Greška: ' + err.message;
         }
+    }
+
+    // 2. MIKROFON LOGIKA
+    let recognition;
+    if ('webkitSpeechRecognition' in window) {
+        recognition = new webkitSpeechRecognition();
+        recognition.lang = 'bs-BA';
+        recognition.onresult = (e) => { output.value = e.results[0][0].transcript; };
+    }
+
+    micBtn.onclick = () => { recognition.start(); };
+
+    // 3. SLANJE U BAZU
+    sendBtn.onclick = async () => {
+        sendBtn.disabled = true;
+        sendBtn.innerText = 'Slanje...';
+        await fetch(FUNCTION_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tekst_za_obradu: output.value })
+        });
+        output.value = '';
+        sendBtn.disabled = false;
+        sendBtn.innerText = '🚀 Pošalji u Bazu';
+        povuciPodatke(); // Automatski osvježi listu nakon slanja
     };
+
+    refreshBtn.onclick = povuciPodatke;
+    
+    // Pokreni odmah pri učitavanju
+    window.onload = povuciPodatke;
+    // Provjeravaj svakih 5 minuta automatski
+    setInterval(povuciPodatke, 300000);
 </script>
 
 </body>
