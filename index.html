@@ -103,5 +103,39 @@
     };
 </script>
 
+    <script>
+  // Provjeravamo da li browser podržava prepoznavanje glasa
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  
+  if (SpeechRecognition) {
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'bs-BA'; // Postavljeno na bosanski
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    const btn = document.querySelector('button'); // Tvoje dugme
+    const statusText = document.querySelector('p'); // Tekst "Spreman"
+    const textBox = document.querySelector('.text-box-klasa'); // Promijeni u klasu tvog polja
+
+    btn.addEventListener('click', () => {
+      recognition.start();
+      statusText.innerText = "Slušam...";
+    });
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      // Ovdje upisujemo ono što si rekao u box
+      document.getElementById('tvoj-id-tekst-boxa').value = transcript; 
+      statusText.innerText = "Završeno.";
+    };
+
+    recognition.onerror = (event) => {
+      statusText.innerText = "Greška: " + event.error;
+    };
+  } else {
+    alert("Vaš browser ne podržava prepoznavanje glasa. Probajte Google Chrome.");
+  }
+</script>
+    
 </body>
 </html>
