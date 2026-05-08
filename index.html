@@ -5,19 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Nadzor Alarma</title>
     <style>
-        body { font-family: sans-serif; background-color: #f4f4f9; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 600px; text-align: center; }
-        textarea { width: 100%; min-height: 100px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ddd; padding: 10px; }
-        button { padding: 12px 20px; cursor: pointer; border: none; border-radius: 8px; font-weight: bold; width: 100%; margin-bottom: 10px; }
-        .btn-mic { background-color: #007bff; color: white; }
-        .btn-send { background-color: #28a745; color: white; }
-        .btn-refresh { background-color: #17a2b8; color: white; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        th { background-color: #eee; }
-        .alarm-aktivni { background-color: #ffcccc; color: #cc0000; font-weight: bold; animation: treperi 1s infinite; }
-        @keyframes treperi { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-    </style>
+    body { 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        background-color: #eef2f7; 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        padding: 20px; 
+    }
+    .container { 
+        background: white; 
+        padding: 25px; 
+        border-radius: 15px; 
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
+        width: 100%; 
+        max-width: 700px; 
+        text-align: center; 
+    }
+    textarea { 
+        width: 100%; 
+        min-height: 120px; 
+        margin-bottom: 15px; 
+        border-radius: 10px; 
+        border: 2px solid #dfe4ea; 
+        padding: 12px; 
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+    button { 
+        padding: 14px 20px; 
+        cursor: pointer; 
+        border: none; 
+        border-radius: 10px; 
+        font-weight: bold; 
+        width: 100%; 
+        margin-bottom: 12px; 
+        transition: transform 0.1s;
+    }
+    button:active { transform: scale(0.98); }
+    
+    .btn-mic { background-color: #007bff; color: white; }
+    .btn-send { background-color: #2ed573; color: white; }
+    .btn-refresh { background-color: #1e90ff; color: white; }
+    
+    table { width: 100%; border-collapse: collapse; margin-top: 25px; background: white; }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    th { background-color: #f1f2f6; color: #2f3542; }
+
+    /* --- ALARM KOJI TREPERI (24h) --- */
+    .alarm-aktivni { 
+        background-color: #ff4757 !important; /* Jaka crvena */
+        color: white !important; 
+        font-weight: bold; 
+        animation: alarmPuls 0.8s infinite; 
+    }
+
+    @keyframes alarmPuls { 
+        0% { background-color: #ff4757; } 
+        50% { background-color: #ff6b81; } 
+        100% { background-color: #ff4757; } 
+    }
+</style>
 </head>
 <body>
 
@@ -51,51 +99,46 @@
 
     // 1. FUNKCIJA ZA POVLAČENJE PODATAKA I ALARM
    async function povuciPodatke() {
-    lista.innerHTML = 'Učitavam cijelu bazu podataka...';
+    lista.innerHTML = 'Učitavam...';
     try {
-        // Povlačimo sve zapise, poredane po datumu (najnoviji na vrhu)
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/IZVJESTAJI_NH?select=*&order=DATUM.desc`, {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/IZVJESTAJI_NH?select=*&order=DATUM.asc`, {
             headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` }
         });
         const podaci = await res.json();
         
         const sad = new Date();
-        const sutraUovoVrijeme = new Date(sad.getTime() + (24 * 60 * 60 * 1000));
-        let imaHitnihAlarma = false;
+        const sutra = new Date();
+        sutra.setHours(sad.getHours() + 24); // Tačno 24 sata od ovog trenutka
 
-        let html = '<table border="1" style="width:100%; border-collapse: collapse;">';
-        html += '<tr style="background:#eee;"><th>Datum</th><th>Razlog / Zadatak</th></tr>';
-        
+        let html = '<table><tr><th>Vrijeme</th><th>Opis</th></tr>';
+        let imaHitno = false;
+
         podaci.forEach(red => {
-            const datumAlarma = new Date(red.DATUM);
+            if (!red.DATUM) return; // Preskoči ako nema datuma
             
-            // PROVJERA: Da li je alarm u budućnosti, ali u okviru narednih 24 sata?
-            const jeUNarednih24h = datumAlarma >= sad && datumAlarma <= sutraUovoVrijeme;
+            const d = new Date(red.DATUM);
             
-            let stil = '';
-            if (jeUNarednih24h) {
-                // Ako je u naredna 24h, red postaje crven i treperi
-                stil = 'class="alarm-aktivni"';
-                imaHitnihAlarma = true;
-            }
+            // PROVJERA: Da li je termin između SADA i SUTRA u ovo vrijeme?
+            const jeHitno = d >= sad && d <= sutra;
+            
+            // Ako je hitno, dodajemo klasu koja će natjerati red da treperi
+            const klasa = jeHitno ? 'class="alarm-aktivni"' : '';
+            
+            if(jeHitno) imaHitno = true;
 
-            html += `<tr ${stil}>
-                <td style="padding:8px;">${datumAlarma.toLocaleString('bs-BA')}</td>
-                <td style="padding:8px;">${red.RAZLOG}</td>
+            html += `<tr ${klasa}>
+                <td>${d.toLocaleString('bs-BA', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})}</td>
+                <td>${red.RAZLOG}</td>
             </tr>`;
         });
-        
         html += '</table>';
         lista.innerHTML = html;
 
-        // Sirena se pali samo ako ima nešto što tek treba da dođe u narednih 24 sata
-        if (imaHitnihAlarma) {
-            sirena.play().catch(e => console.log("Klikni na stranicu da aktiviraš zvuk sirene!"));
-            console.log("ALARM: Postoje zadaci u narednih 24h!");
+        if (imaHitno) {
+            sirena.play().catch(e => console.log("Klikni na stranicu!"));
         }
-
     } catch (err) {
-        lista.innerHTML = 'Greška pri povlačenju: ' + err.message;
+        lista.innerHTML = 'Greška: ' + err.message;
     }
 }
 
