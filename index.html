@@ -50,41 +50,54 @@
     const sirena = document.getElementById('sirena');
 
     // 1. FUNKCIJA ZA POVLAČENJE PODATAKA I ALARM
-    async function povuciPodatke() {
-        lista.innerHTML = 'Provjeravam bazu...';
-        try {
-            const res = await fetch(`${SUPABASE_URL}/rest/v1/IZVJESTAJI_NH?select=*&order=DATUM.asc`, {
-                headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` }
-            });
-            const podaci = await res.json();
+   async function povuciPodatke() {
+    lista.innerHTML = 'Učitavam cijelu bazu podataka...';
+    try {
+        // Povlačimo sve zapise, poredane po datumu (najnoviji na vrhu)
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/IZVJESTAJI_NH?select=*&order=DATUM.desc`, {
+            headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` }
+        });
+        const podaci = await res.json();
+        
+        const sad = new Date();
+        const sutraUovoVrijeme = new Date(sad.getTime() + (24 * 60 * 60 * 1000));
+        let imaHitnihAlarma = false;
+
+        let html = '<table border="1" style="width:100%; border-collapse: collapse;">';
+        html += '<tr style="background:#eee;"><th>Datum</th><th>Razlog / Zadatak</th></tr>';
+        
+        podaci.forEach(red => {
+            const datumAlarma = new Date(red.DATUM);
             
-            const sad = new Date();
-            const sutra = new Date(sad.getTime() + (24 * 60 * 60 * 1000));
-            let imaAlarma = false;
-
-            let html = '<table><tr><th>Datum</th><th>Razlog</th></tr>';
-            podaci.forEach(red => {
-                const d = new Date(red.DATUM);
-                const jeU24h = d >= sad && d <= sutra;
-                const klasa = jeU24h ? 'class="alarm-aktivni"' : '';
-                
-                if(jeU24h) imaAlarma = true;
-
-                html += `<tr ${klasa}>
-                    <td>${d.toLocaleString('bs-BA')}</td>
-                    <td>${red.RAZLOG}</td>
-                </tr>`;
-            });
-            html += '</table>';
-            lista.innerHTML = html;
-
-            if (imaAlarma) {
-                sirena.play().catch(() => console.log("Klikni na stranicu da omogućiš zvuk!"));
+            // PROVJERA: Da li je alarm u budućnosti, ali u okviru narednih 24 sata?
+            const jeUNarednih24h = datumAlarma >= sad && datumAlarma <= sutraUovoVrijeme;
+            
+            let stil = '';
+            if (jeUNarednih24h) {
+                // Ako je u naredna 24h, red postaje crven i treperi
+                stil = 'class="alarm-aktivni"';
+                imaHitnihAlarma = true;
             }
-        } catch (err) {
-            lista.innerHTML = 'Greška: ' + err.message;
+
+            html += `<tr ${stil}>
+                <td style="padding:8px;">${datumAlarma.toLocaleString('bs-BA')}</td>
+                <td style="padding:8px;">${red.RAZLOG}</td>
+            </tr>`;
+        });
+        
+        html += '</table>';
+        lista.innerHTML = html;
+
+        // Sirena se pali samo ako ima nešto što tek treba da dođe u narednih 24 sata
+        if (imaHitnihAlarma) {
+            sirena.play().catch(e => console.log("Klikni na stranicu da aktiviraš zvuk sirene!"));
+            console.log("ALARM: Postoje zadaci u narednih 24h!");
         }
+
+    } catch (err) {
+        lista.innerHTML = 'Greška pri povlačenju: ' + err.message;
     }
+}
 
     // 2. MIKROFON LOGIKA
     let recognition;
