@@ -152,19 +152,32 @@
 
     micBtn.onclick = () => { recognition.start(); };
 
-    // 3. SLANJE U BAZU
+  // 3. SLANJE U BAZU
     sendBtn.onclick = async () => {
+        if (!output.value) return alert("Prvo izdiktiraj nešto!");
+        
         sendBtn.disabled = true;
         sendBtn.innerText = 'Slanje...';
-        await fetch(FUNCTION_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tekst_za_obradu: output.value })
-        });
-        output.value = '';
-        sendBtn.disabled = false;
-        sendBtn.innerText = '🚀 Pošalji u Bazu';
-        povuciPodatke(); // Automatski osvježi listu nakon slanja
+        
+        try {
+            await fetch(FUNCTION_URL, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'apikey': ANON_KEY  // <--- OVO JE FALILO DA BI PROŠLO KROZ VRATA
+                },
+                body: JSON.stringify({ tekst_za_obradu: output.value })
+            });
+            
+            output.value = '';
+            alert("Izvještaj uspješno poslan!");
+            povuciPodatke(); 
+        } catch (err) {
+            alert("Greška pri slanju: " + err.message);
+        } finally {
+            sendBtn.disabled = false;
+            sendBtn.innerText = '🚀 Pošalji u Bazu';
+        }
     };
 
     refreshBtn.onclick = povuciPodatke;
