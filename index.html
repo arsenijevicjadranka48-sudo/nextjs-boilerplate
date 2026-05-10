@@ -3,77 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Nadzor Alarma</title>
+    <title>AI Nadzor Alarma - Supabase</title>
     <style>
-    body { 
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-        background-color: #eef2f7; 
-        display: flex; 
-        flex-direction: column; 
-        align-items: center; 
-        padding: 20px; 
-    }
-    .container { 
-        background: white; 
-        padding: 25px; 
-        border-radius: 15px; 
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
-        width: 100%; 
-        max-width: 700px; 
-        text-align: center; 
-    }
-    textarea { 
-        width: 100%; 
-        min-height: 120px; 
-        margin-bottom: 15px; 
-        border-radius: 10px; 
-        border: 2px solid #dfe4ea; 
-        padding: 12px; 
-        font-size: 1rem;
-        box-sizing: border-box;
-    }
-    button { 
-        padding: 14px 20px; 
-        cursor: pointer; 
-        border: none; 
-        border-radius: 10px; 
-        font-weight: bold; 
-        width: 100%; 
-        margin-bottom: 12px; 
-        transition: transform 0.1s;
-    }
-    button:active { transform: scale(0.98); }
-    
-    .btn-mic { background-color: #007bff; color: white; }
-    .btn-send { background-color: #2ed573; color: white; }
-    .btn-refresh { background-color: #1e90ff; color: white; }
-    
-    table { width: 100%; border-collapse: collapse; margin-top: 25px; background: white; }
-    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-    th { background-color: #f1f2f6; color: #2f3542; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #eef2f7; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 20px; 
+        }
+        .container { 
+            background: white; 
+            padding: 25px; 
+            border-radius: 15px; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
+            width: 100%; 
+            max-width: 700px; 
+            text-align: center; 
+        }
+        textarea { 
+            width: 100%; 
+            min-height: 120px; 
+            margin-bottom: 15px; 
+            border-radius: 10px; 
+            border: 2px solid #dfe4ea; 
+            padding: 12px; 
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        button { 
+            padding: 14px 20px; 
+            cursor: pointer; 
+            border: none; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            width: 100%; 
+            margin-bottom: 12px; 
+            transition: transform 0.1s;
+        }
+        button:active { transform: scale(0.98); }
+        
+        .btn-mic { background-color: #007bff; color: white; }
+        .btn-send { background-color: #2ed573; color: white; }
+        .btn-refresh { background-color: #1e90ff; color: white; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 25px; background: white; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f1f2f6; color: #2f3542; }
 
-    /* --- ALARM KOJI TREPERI (24h) --- */
-    .alarm-aktivni { 
-        background-color: #ff4757 !important; /* Jaka crvena */
-        color: white !important; 
-        font-weight: bold; 
-        animation: alarmPuls 0.8s infinite; 
-    }
+        .alarm-aktivni { 
+            background-color: #ff4757 !important; 
+            color: white !important; 
+            font-weight: bold; 
+            animation: alarmPuls 0.8s infinite; 
+        }
 
-    @keyframes alarmPuls { 
-        0% { background-color: #ff4757; } 
-        50% { background-color: #ff6b81; } 
-        100% { background-color: #ff4757; } 
-    }
-</style>
+        @keyframes alarmPuls { 
+            0% { background-color: #ff4757; } 
+            50% { background-color: #ff6b81; } 
+            100% { background-color: #ff4757; } 
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🎤 Novi Izvještaj / Alarm</h2>
-    <textarea id="output" placeholder="Izdiktiraj kvar ili sastanak..."></textarea>
+    <h2>🎤 Novi AI Izvještaj</h2>
+    <textarea id="output" placeholder="Izdiktiraj kvar (npr: Popravi pumpu sutra u 10h)..."></textarea>
     <button id="micBtn" class="btn-mic">🎤 Pokreni Mikrofon</button>
-    <button id="sendBtn" class="btn-send">🚀 Pošalji u Bazu</button>
+    <button id="sendBtn" class="btn-send">🚀 Pošalji AI na obradu</button>
 
     <hr>
     
@@ -85,10 +84,10 @@
 <audio id="sirena" src="https://actions.google.com/sounds/v1/alarms/alarm_clock_short_beeps.ogg" preload="auto"></audio>
 
 <script>
-    // --- KONFIGURACIJA (OVDJE STAVI SVOJE KLJUČEVE) ---
+    // --- KONFIGURACIJA ---
     const SUPABASE_URL = 'https://mpgbpgmsorunfbdskbwn.supabase.co';
-    const ANON_KEY = 'sb_publishable_PIRKTE7AzJKSBwLjPB04yg_laTBEEb6'; // Pronađi u Supabase Settings > API
-    const FUNCTION_URL = 'https://mpgbpgmsorunfbdskbwn.supabase.co/functions/v1/quick-worker';
+    const ANON_KEY = 'sb_publishable_PIRKTE7AzJKSBwLjPB04yg_laTBEEb6'; 
+    const FUNCTION_URL = `${SUPABASE_URL}/functions/v1/quick-worker`;
 
     const output = document.getElementById('output');
     const micBtn = document.getElementById('micBtn');
@@ -97,95 +96,102 @@
     const lista = document.getElementById('listaIzvjestaja');
     const sirena = document.getElementById('sirena');
 
-    // 1. FUNKCIJA ZA POVLAČENJE PODATAKA I ALARM
-   async function povuciPodatke() {
-    lista.innerHTML = 'Učitavam...';
-    try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/IZVJESTAJI_NH?select=*&order=DATUM.asc`, {
-            headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` }
-        });
-        const podaci = await res.json();
-        
-        const sad = new Date();
-        const sutra = new Date();
-        sutra.setHours(sad.getHours() + 24); // Tačno 24 sata od ovog trenutka
-
-        let html = '<table><tr><th>Vrijeme</th><th>Opis</th></tr>';
-        let imaHitno = false;
-
-        podaci.forEach(red => {
-            if (!red.DATUM) return; // Preskoči ako nema datuma
+    // 1. POVLAČENJE PODATAKA IZ TABELE
+    async function povuciPodatke() {
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/IZVJESTAJI_NH?select=*&order=DATUM.asc`, {
+                headers: { 
+                    'apikey': ANON_KEY, 
+                    'Authorization': `Bearer ${ANON_KEY}` 
+                }
+            });
+            const podaci = await res.json();
             
-            const d = new Date(red.DATUM);
-            
-            // PROVJERA: Da li je termin između SADA i SUTRA u ovo vrijeme?
-            const jeHitno = d >= sad && d <= sutra;
-            
-            // Ako je hitno, dodajemo klasu koja će natjerati red da treperi
-            const klasa = jeHitno ? 'class="alarm-aktivni"' : '';
-            
-            if(jeHitno) imaHitno = true;
+            const sad = new Date();
+            const sutra = new Date();
+            sutra.setHours(sad.getHours() + 24);
 
-            html += `<tr ${klasa}>
-                <td>${d.toLocaleString('bs-BA', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})}</td>
-                <td>${red.RAZLOG}</td>
-            </tr>`;
-        });
-        html += '</table>';
-        lista.innerHTML = html;
+            let html = '<table><tr><th>Vrijeme</th><th>Opis</th></tr>';
+            let imaHitno = false;
 
-        if (imaHitno) {
-            sirena.play().catch(e => console.log("Klikni na stranicu!"));
+            podaci.forEach(red => {
+                if (!red.DATUM) return;
+                const d = new Date(red.DATUM);
+                const jeHitno = d >= sad && d <= sutra;
+                const klasa = jeHitno ? 'class="alarm-aktivni"' : '';
+                
+                if(jeHitno) imaHitno = true;
+
+                html += `<tr ${klasa}>
+                    <td>${d.toLocaleString('bs-BA', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})}</td>
+                    <td>${red.RAZLOG || 'Nema opisa'}</td>
+                </tr>`;
+            });
+            html += '</table>';
+            lista.innerHTML = podaci.length > 0 ? html : 'Nema zabilježenih izvještaja.';
+
+            if (imaHitno) {
+                sirena.play().catch(() => console.log("Interakcija potrebna za zvuk"));
+            }
+        } catch (err) {
+            lista.innerHTML = 'Greška pri učitavanju: ' + err.message;
         }
-    } catch (err) {
-        lista.innerHTML = 'Greška: ' + err.message;
     }
-}
 
-    // 2. MIKROFON LOGIKA
+    // 2. SPEECH-TO-TEXT (Mikrofon)
     let recognition;
-    if ('webkitSpeechRecognition' in window) {
-        recognition = new webkitSpeechRecognition();
+    if ('webkitSpeechRecognition' in window || 'speechRecognition' in window) {
+        const SpeechAPI = window.webkitSpeechRecognition || window.speechRecognition;
+        recognition = new SpeechAPI();
         recognition.lang = 'bs-BA';
         recognition.onresult = (e) => { output.value = e.results[0][0].transcript; };
+    } else {
+        micBtn.innerText = "Mikrofon nije podržan";
+        micBtn.disabled = true;
     }
 
-    micBtn.onclick = () => { recognition.start(); };
+    micBtn.onclick = () => { 
+        recognition.start(); 
+    };
 
-  // 3. SLANJE U BAZU
+    // 3. SLANJE NA SUPABASE EDGE FUNKCIJU
     sendBtn.onclick = async () => {
-        if (!output.value) return alert("Prvo izdiktiraj nešto!");
+        const tekst = output.value.trim();
+        if (!tekst) return alert("Prvo izdiktiraj ili upiši tekst!");
         
         sendBtn.disabled = true;
-        sendBtn.innerText = 'Slanje...';
+        sendBtn.innerText = 'AI obrađuje...';
         
         try {
-            await fetch(FUNCTION_URL, {
+            const response = await fetch(FUNCTION_URL, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'apikey': ANON_KEY  // <--- OVO JE FALILO DA BI PROŠLO KROZ VRATA
+                    'apikey': ANON_KEY,
+                    'Authorization': `Bearer ${ANON_KEY}`
                 },
-                body: JSON.stringify({ tekst_za_obradu: output.value })
+                body: JSON.stringify({ tekst_za_obradu: tekst })
             });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Neuspješno slanje');
+            }
             
             output.value = '';
-            alert("Izvještaj uspješno poslan!");
-            povuciPodatke(); 
+            alert("AI je uspješno obradio i spasio izvještaj!");
+            setTimeout(povuciPodatke, 1500); // Mala pauza da baza procesira
         } catch (err) {
-            alert("Greška pri slanju: " + err.message);
+            alert("Greška: " + err.message);
         } finally {
             sendBtn.disabled = false;
-            sendBtn.innerText = '🚀 Pošalji u Bazu';
+            sendBtn.innerText = '🚀 Pošalji AI na obradu';
         }
     };
 
     refreshBtn.onclick = povuciPodatke;
-    
-    // Pokreni odmah pri učitavanju
     window.onload = povuciPodatke;
-    // Provjeravaj svakih 5 minuta automatski
-    setInterval(povuciPodatke, 300000);
+    setInterval(povuciPodatke, 60000); // Automatsko osvježavanje svake minute
 </script>
 
 </body>
